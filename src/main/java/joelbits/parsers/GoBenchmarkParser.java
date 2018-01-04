@@ -31,7 +31,13 @@ public class GoBenchmarkParser implements Parser {
         return benchmarkBodies.get(benchmark);
     }
 
-    public static void main( String[] args) throws Exception  {
+    /**
+     * This main method only shows one way to use the parser and check the results. It should not be here.
+     *
+     * @param args
+     * @throws Exception
+     */
+    public static void main(String[] args) throws Exception  {
         File file = new File("C:\\Users\\joel\\Desktop\\thesis\\dataset\\Go\\gin-gonic\\gin\\benchmarks_test.go");
         org.antlr.v4.runtime.CharStream input = org.antlr.v4.runtime.CharStreams.fromStream(new FileInputStream(file));
         GolangLexer lexer = new GolangLexer(input);
@@ -45,16 +51,13 @@ public class GoBenchmarkParser implements Parser {
         try {
             parser.reset();
 
-            System.out.println("BEFORE");
             visitor.visitSourceFile(parser.sourceFile());
-            System.out.println("AFTER");
 
             Map<String, String> benchmarks = BenchmarkErrorListener.INSTANCE.benchmarkBodies();
             Map<String, String> benchmarksParams = BenchmarkErrorListener.INSTANCE.benchmarkParameters();
             Map<String, String> moreBenchmarks = visitor.benchmarkParameters();
             Map<String, String> mostBenchmarks = visitor.benchmarkBodies();
-            System.out.println("Antal benchmarkBodies i lyssnaren: " + benchmarks.size());
-            System.out.println("Antal benchmarkBodies i visitor: " + moreBenchmarks.size());
+
             for (Map.Entry<String, String> benchmark : benchmarks.entrySet()) {
                 System.out.println("key: " + benchmark.getKey() + " and value: " + benchmark.getValue());
             }
@@ -69,8 +72,8 @@ public class GoBenchmarkParser implements Parser {
                 System.out.println("key: " + benchmark.getKey() + " and value: " + benchmark.getValue());
             }
 
-        } catch (Exception ex) {
-            System.out.println(ex);
+        } catch (Exception e) {
+            log.error(e.toString(), e);
         }
     }
 
