@@ -1,6 +1,6 @@
-// Generated from C:\Users\joel\Desktop\projects\parser-golang\src\main\java\joelbits\parsers\golang\Golang.g4 by ANTLR 4.7
-package joelbits.parsers.golang;
+package joelbits.modules.preprocessing.plugins.golang;
 
+// Generated from Golang.g4 by ANTLR 4.7
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 
 /**

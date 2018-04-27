@@ -5,6 +5,13 @@
     <version>1.0</version>
     <packaging>jar</packaging>
 
+    <repositories>
+        <repository>
+            <id>localrepository</id>
+            <url>file://${basedir}/repo</url>
+        </repository>
+    </repositories>
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <antlr4.visitor>true</antlr4.visitor>
@@ -61,7 +68,7 @@
                 <artifactId>antlr4-maven-plugin</artifactId>
                 <version>4.7</version>
                 <configuration>
-                    <sourceDirectory>${basedir}/src/main/java/joelbits/parsers/golang</sourceDirectory>
+                    <sourceDirectory>src/main/java/joelbits/modules/preprocessing/plugins/golang</sourceDirectory>
                     <!--<grammars>Golang.g4</grammars>-->
                     <visitor>true</visitor>
                     <listener>true</listener>
@@ -97,6 +104,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>joelbits</groupId>
+            <artifactId>mining-model</artifactId>
+            <version>1.0</version>
+        </dependency>
+        <dependency>
             <groupId>org.antlr</groupId>
             <artifactId>antlr4</artifactId>
             <version>4.7</version>
@@ -111,11 +123,6 @@
             <artifactId>auto-service</artifactId>
             <version>1.0-rc3</version>
             <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>1.7.25</version>
         </dependency>
     </dependencies>
 </project>

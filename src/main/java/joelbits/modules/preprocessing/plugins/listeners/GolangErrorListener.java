@@ -1,4 +1,4 @@
-package joelbits.parsers;
+package joelbits.modules.preprocessing.plugins.listeners;
 
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.atn.ATNConfigSet;
@@ -8,17 +8,16 @@ import java.util.BitSet;
 import java.util.HashMap;
 import java.util.Map;
 
-public class BenchmarkErrorListener implements ANTLRErrorListener {
+public class GolangErrorListener implements ANTLRErrorListener {
     private static final Map<String, String> benchmarkBodies = new HashMap<>();
     private static final Map<String, String> benchmarkParameters = new HashMap<>();
-
-    static final BenchmarkErrorListener INSTANCE = new BenchmarkErrorListener();
 
     @Override
     public void syntaxError(Recognizer<?, ?> recognizer, Object o, int i, int i1, String s, RecognitionException e) {
         if(o.getClass().getName().equals("org.antlr.v4.runtime.CommonToken")) {
             CommonToken token = (CommonToken) o;
             if (token.getText().contains("Benchmark")) {
+                System.out.println("Entered errorListener: " + token.getText());
                 int benchmarkIndex = token.getText().indexOf("Benchmark", 0);
                 String benchmark = token.getText().substring(benchmarkIndex);
                 benchmarkBodies.put(benchmark, "");
