@@ -7,7 +7,10 @@ import joelbits.model.ast.protobuf.ASTProtos.Type;
 import joelbits.model.ast.protobuf.ASTProtos.DeclarationType;
 import joelbits.model.ast.protobuf.ASTProtos.Method;
 import joelbits.modules.preprocessing.plugins.golang.GolangBaseListener;
-import joelbits.modules.preprocessing.plugins.golang.GolangParser;
+import joelbits.modules.preprocessing.plugins.golang.GolangParser.MethodDeclContext;
+import joelbits.modules.preprocessing.plugins.golang.GolangParser.FunctionContext;
+import joelbits.modules.preprocessing.plugins.golang.GolangParser.FunctionDeclContext;
+import joelbits.modules.preprocessing.plugins.golang.GolangParser.ParameterDeclContext;
 import joelbits.modules.preprocessing.plugins.utils.ASTNodeCreator;
 
 import java.util.ArrayList;
@@ -21,16 +24,18 @@ public final class FunctionListener extends GolangBaseListener {
     private String name;
 
     @Override
-    public void enterFunction(GolangParser.FunctionContext ctx) {
+    public void enterFunction(FunctionContext ctx) {
         createArguments(ctx.signature().parameters().parameterList().parameterDecl());
 
-        BlockListener blockListener = new BlockListener();
-        blockListener.enterBlock(ctx.block());
+        StatementListener statementListener = new StatementListener();
+        statementListener.enterBlock(ctx.block());
+        statements.addAll(statementListener.statements());
+        expressions.addAll(statementListener.expressions());
     }
 
-    private void createArguments(List<GolangParser.ParameterDeclContext> parameters) {
+    private void createArguments(List<ParameterDeclContext> parameters) {
         List<Variable> arguments = new ArrayList<>();
-        for (GolangParser.ParameterDeclContext parameter : parameters) {
+        for (ParameterDeclContext parameter : parameters) {
             Type type = astNodeCreator.createType(parameter.type().getText(), DeclarationType.OTHER);
             arguments.add(astNodeCreator
                     .createVariable(parameter.start.getText(), type, Expression.getDefaultInstance()));
@@ -40,11 +45,16 @@ public final class FunctionListener extends GolangBaseListener {
     }
 
     @Override
-    public void enterFunctionDecl(GolangParser.FunctionDeclContext ctx) {
+    public void enterFunctionDecl(FunctionDeclContext ctx) {
         name = ctx.IDENTIFIER().getText();
     }
 
-    Method function() {
+    @Override
+    public void enterMethodDecl(MethodDeclContext ctx) {
+        name = ctx.IDENTIFIER().getText();
+    }
+
+    public Method function() {
         Type type = astNodeCreator.createType("func", DeclarationType.OTHER);
         return astNodeCreator.createMethod(name, type, arguments, expressions, statements);
     }

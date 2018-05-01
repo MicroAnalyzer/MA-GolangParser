@@ -16,8 +16,10 @@ public final class FieldListener extends GolangBaseListener {
         for (GolangParser.VarSpecContext spec : ctx.varSpec()) {
             String name = spec.start.getText();
             String value = "";
-            for (GolangParser.ExpressionContext expr : spec.expressionList().expression()) {
-                value = expr.getText();
+            if (spec.expressionList() != null) {
+                for (GolangParser.ExpressionContext expr : spec.expressionList().expression()) {
+                    value = expr.getText();
+                }
             }
             Expression expression = astNodeCreator
                     .createVarDeclarationExpression(value, name);

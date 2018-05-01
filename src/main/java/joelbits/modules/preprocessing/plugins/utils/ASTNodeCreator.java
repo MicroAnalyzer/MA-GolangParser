@@ -67,36 +67,6 @@ public final class ASTNodeCreator {
                 .build();
     }
 
-    public Expression createAssignmentExpression(ExpressionType type, String literal, String variable, List<Expression> expressions) {
-        return Expression.newBuilder()
-                .setType(type)
-                .setLiteral(literal)
-                .setVariable(variable)
-                .addAllExpressions(expressions)
-                .build();
-    }
-
-    public Expression createCreationExpression(String literal, String variable, List<Expression> arguments) {
-        return Expression.newBuilder()
-                .setType(ExpressionType.NEW)
-                .setLiteral(literal)
-                .setVariable(variable)
-                .addAllMethodArguments(arguments)
-                .build();
-    }
-
-    public Expression createExpression(ExpressionType type, String literal, String variable, List<Variable> declarations, List<Expression> arguments, Type newType, List<Expression> expressions) {
-        return Expression.newBuilder()
-                .setType(type)
-                .setLiteral(literal)
-                .setVariable(variable)
-                .addAllVariableDeclarations(declarations)
-                .addAllMethodArguments(arguments)
-                .setNewType(newType)
-                .addAllExpressions(expressions)
-                .build();
-    }
-
     public Expression createMethodBodyExpression(ExpressionType type, String variable, String literal) {
         return Expression.newBuilder()
                 .setType(type)
@@ -114,18 +84,12 @@ public final class ASTNodeCreator {
                 .build();
     }
 
-    public Statement createReturnStatement(List<Expression> expressions) {
-        return Statement.newBuilder()
-                .setType(StatementType.RETURN)
-                .addAllExpressions(expressions)
-                .build();
-    }
-
-    public Statement createStatement(StatementType type, Expression condition, List<Statement> statements) {
+    public Statement createStatement(StatementType type, Expression condition, List<Statement> statements, List<Expression> expressions) {
         return Statement.newBuilder()
                 .setType(type)
                 .setCondition(condition)
                 .addAllStatements(statements)
+                .addAllExpressions(expressions)
                 .build();
     }
 
@@ -134,24 +98,6 @@ public final class ASTNodeCreator {
                 .setType(StatementType.BLOCK)
                 .addAllExpressions(expressions)
                 .addAllStatements(statements)
-                .build();
-    }
-
-    public Statement createTryStatement(List<Statement> statements) {
-        return Statement.newBuilder()
-                .setType(StatementType.TRY)
-                .addAllStatements(statements)
-                .build();
-    }
-
-    public Statement createStatement(StatementType type, List<Expression> expressions, Expression condition, List<Statement> nestedStatements, List<Expression> initializations, List<Expression> updates) {
-        return Statement.newBuilder()
-                .setType(type)
-                .addAllExpressions(expressions)
-                .setCondition(condition)
-                .addAllStatements(nestedStatements)
-                .addAllInitializations(initializations)
-                .addAllUpdates(updates)
                 .build();
     }
 

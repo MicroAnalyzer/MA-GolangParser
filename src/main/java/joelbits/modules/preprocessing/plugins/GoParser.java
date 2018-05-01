@@ -1,8 +1,8 @@
 package joelbits.modules.preprocessing.plugins;
 
+import com.google.auto.service.AutoService;
 import joelbits.model.ast.protobuf.ASTProtos.Variable;
 import joelbits.model.ast.protobuf.ASTProtos.Method;
-import joelbits.model.ast.protobuf.ASTProtos.Declaration;
 import joelbits.model.ast.protobuf.ASTProtos.Namespace;
 import joelbits.modules.preprocessing.plugins.golang.GolangParser;
 import joelbits.modules.preprocessing.plugins.golang.GolangLexer;
@@ -21,6 +21,7 @@ import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+@AutoService(FileParser.class)
 public final class GoParser implements FileParser {
     private static final List<String> imports = new ArrayList<>();
     private static final List<Namespace> namespaces = new ArrayList<>();
@@ -31,16 +32,14 @@ public final class GoParser implements FileParser {
     public byte[] parse(File file) throws Exception {
         loadFile(file);
 
-        List<Declaration> declarations = new ArrayList<>();
-        String namespace = file.getName().substring(0, file.getName().lastIndexOf("."));
         NamespaceCreator namespaceCreator = new NamespaceCreator();
-        namespaceCreator.createNamespace(namespace, new ArrayList<>());
-
         try {
             ParseTree tree = parser.sourceFile();
             ParseTreeWalker walker = new ParseTreeWalker();
-            ClassListener classListener = new ClassListener(namespace, declarations);
+            String namespace = file.getName().substring(0, file.getName().lastIndexOf("."));
+            ClassListener classListener = new ClassListener(namespace);
             walker.walk(classListener, tree);
+            namespaceCreator.createNamespace(namespace, classListener.namespaceDeclarations());
         } catch (Exception e) {
             System.out.println(e.toString());
         }
@@ -72,9 +71,24 @@ public final class GoParser implements FileParser {
     @Override
     public boolean hasBenchmarks(File file) throws Exception {
         loadFile(file);
-        for (Method method : namespaces.get(0).getDeclarationsList().get(0).getMethodsList()) {
+
+        String namespace = file.getName().substring(0, file.getName().lastIndexOf("."));
+        ClassListener classListener = new ClassListener(namespace);
+        try {
+            ParseTree tree = parser.sourceFile();
+            ParseTreeWalker walker = new ParseTreeWalker();
+            walker.walk(classListener, tree);
+        } catch (Exception e) {
+            System.out.println(e.toString());
+        }
+
+        return hasBenchmarks(classListener.methods());
+    }
+
+    private boolean hasBenchmarks(List<Method> methods) {
+        for (Method method : methods) {
             for(Variable argument : method.getArgumentsList()) {
-                if(argument.getName().contains("*testing.B")) {
+                if(argument.getType().getName().contains("*testing.B")) {
                     return true;
                 }
             }
