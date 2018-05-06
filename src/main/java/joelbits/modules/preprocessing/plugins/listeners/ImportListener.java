@@ -1,7 +1,8 @@
 package joelbits.modules.preprocessing.plugins.listeners;
 
 import joelbits.modules.preprocessing.plugins.golang.GolangBaseListener;
-import joelbits.modules.preprocessing.plugins.golang.GolangParser;
+import joelbits.modules.preprocessing.plugins.golang.GolangParser.ImportDeclContext;
+import joelbits.modules.preprocessing.plugins.golang.GolangParser.ImportSpecContext;
 
 import java.util.List;
 
@@ -13,8 +14,8 @@ public final class ImportListener extends GolangBaseListener {
     }
 
     @Override
-    public void enterImportDecl(GolangParser.ImportDeclContext ctx) {
-        for (GolangParser.ImportSpecContext importSpec : ctx.importSpec()) {
+    public void enterImportDecl(ImportDeclContext ctx) {
+        for (ImportSpecContext importSpec : ctx.importSpec()) {
             imports.add(importSpec.getText().replaceAll("\"", ""));
         }
     }

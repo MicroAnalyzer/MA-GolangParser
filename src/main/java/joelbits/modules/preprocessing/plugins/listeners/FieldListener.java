@@ -5,7 +5,7 @@ import joelbits.model.ast.protobuf.ASTProtos.DeclarationType;
 import joelbits.model.ast.protobuf.ASTProtos.Expression;
 import joelbits.modules.preprocessing.plugins.golang.GolangBaseListener;
 import joelbits.modules.preprocessing.plugins.golang.GolangParser;
-import joelbits.modules.preprocessing.plugins.utils.ASTNodeCreator;
+import joelbits.modules.preprocessing.utils.ASTNodeCreator;
 
 public final class FieldListener extends GolangBaseListener {
     private final ASTNodeCreator astNodeCreator = new ASTNodeCreator();

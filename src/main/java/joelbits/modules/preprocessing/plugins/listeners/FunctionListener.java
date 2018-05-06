@@ -11,26 +11,31 @@ import joelbits.modules.preprocessing.plugins.golang.GolangParser.MethodDeclCont
 import joelbits.modules.preprocessing.plugins.golang.GolangParser.FunctionContext;
 import joelbits.modules.preprocessing.plugins.golang.GolangParser.FunctionDeclContext;
 import joelbits.modules.preprocessing.plugins.golang.GolangParser.ParameterDeclContext;
-import joelbits.modules.preprocessing.plugins.utils.ASTNodeCreator;
+import joelbits.modules.preprocessing.utils.ASTNodeCreator;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public final class FunctionListener extends GolangBaseListener {
-    private final ASTNodeCreator astNodeCreator = new ASTNodeCreator();
+    private final ASTNodeCreator astNodeCreator;
     private List<Variable> arguments = new ArrayList<>();
     private List<Expression> expressions = new ArrayList<>();
     private List<Statement> statements = new ArrayList<>();
     private String name;
 
+    FunctionListener(ASTNodeCreator astNodeCreator) {
+        this.astNodeCreator = astNodeCreator;
+    }
+
     @Override
     public void enterFunction(FunctionContext ctx) {
         createArguments(ctx.signature().parameters().parameterList().parameterDecl());
 
-        StatementListener statementListener = new StatementListener();
+        StatementListener statementListener = new StatementListener(astNodeCreator);
         statementListener.enterBlock(ctx.block());
         statements.addAll(statementListener.statements());
         expressions.addAll(statementListener.expressions());
+        statementListener.clear();
     }
 
     private void createArguments(List<ParameterDeclContext> parameters) {
@@ -54,8 +59,16 @@ public final class FunctionListener extends GolangBaseListener {
         name = ctx.IDENTIFIER().getText();
     }
 
-    public Method function() {
+    Method function() {
         Type type = astNodeCreator.createType("func", DeclarationType.OTHER);
-        return astNodeCreator.createMethod(name, type, arguments, expressions, statements);
+        Method method = astNodeCreator.createMethod(name, type, arguments, expressions, statements);
+        clear();
+        return method;
+    }
+
+    private void clear() {
+        arguments.clear();
+        expressions.clear();
+        statements.clear();
     }
 }

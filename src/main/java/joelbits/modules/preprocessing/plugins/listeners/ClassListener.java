@@ -6,7 +6,7 @@ import joelbits.model.ast.protobuf.ASTProtos.Method;
 import joelbits.model.ast.protobuf.ASTProtos.Declaration;
 import joelbits.modules.preprocessing.plugins.golang.GolangBaseListener;
 import joelbits.modules.preprocessing.plugins.golang.GolangParser;
-import joelbits.modules.preprocessing.plugins.utils.ASTNodeCreator;
+import joelbits.modules.preprocessing.utils.ASTNodeCreator;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -14,25 +14,25 @@ import java.util.List;
 
 public final class ClassListener extends GolangBaseListener {
     private List<Declaration> namespaceDeclarations = new ArrayList<>();
-    private final ASTNodeCreator astNodeCreator = new ASTNodeCreator();
+    private final ASTNodeCreator astNodeCreator;
     private final List<Variable> allFields = new ArrayList<>();
     private final List<Method> allMethods = new ArrayList<>();
     private final String namespace;
 
-    public ClassListener(String namespace) {
+    public ClassListener(String namespace, ASTNodeCreator astNodeCreator) {
         this.namespace = namespace;
+        this.astNodeCreator = astNodeCreator;
     }
 
     @Override
     public void enterTopLevelDecl(GolangParser.TopLevelDeclContext ctx) {
+        FunctionListener functionListener = new FunctionListener(astNodeCreator);
         if (ctx.methodDecl() != null) {
-            FunctionListener functionListener = new FunctionListener();
             functionListener.enterMethodDecl(ctx.methodDecl());
             functionListener.enterFunction(ctx.methodDecl().function());
             allMethods.add(functionListener.function());
         }
         if (ctx.functionDecl() != null) {
-            FunctionListener functionListener = new FunctionListener();
             functionListener.enterFunctionDecl(ctx.functionDecl());
             functionListener.enterFunction(ctx.functionDecl().function());
             allMethods.add(functionListener.function());
@@ -52,5 +52,11 @@ public final class ClassListener extends GolangBaseListener {
 
     public List<Method> methods() {
         return Collections.unmodifiableList(allMethods);
+    }
+
+    public void clear() {
+        namespaceDeclarations.clear();
+        allMethods.clear();
+        allFields.clear();
     }
 }

@@ -11,15 +11,19 @@ import joelbits.modules.preprocessing.plugins.golang.GolangParser.PrimaryExprCon
 import joelbits.modules.preprocessing.plugins.golang.GolangParser.VarSpecContext;
 import joelbits.modules.preprocessing.plugins.golang.GolangParser.VarDeclContext;
 import joelbits.modules.preprocessing.plugins.golang.GolangParser.UnaryExprContext;
-import joelbits.modules.preprocessing.plugins.utils.ASTNodeCreator;
+import joelbits.modules.preprocessing.utils.ASTNodeCreator;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 public final class ExpressionListener extends GolangBaseListener {
-    private final ASTNodeCreator astNodeCreator = new ASTNodeCreator();
-    private List<Expression> expressions = new ArrayList<>();
+    private final ASTNodeCreator astNodeCreator;
+    private final List<Expression> expressions = new ArrayList<>();
+
+    ExpressionListener(ASTNodeCreator astNodeCreator) {
+        this.astNodeCreator = astNodeCreator;
+    }
 
     @Override
     public void enterPrimaryExpr(PrimaryExprContext ctx) {
@@ -28,10 +32,11 @@ public final class ExpressionListener extends GolangBaseListener {
                 expressions.add(astNodeCreator
                         .createMethodCallExpression(ctx.getText(), Collections.emptyList()));
             } else {
-                ExpressionListener expressionListener = new ExpressionListener();
+                ExpressionListener expressionListener = new ExpressionListener(astNodeCreator);
                 expressionListener.enterArguments(ctx.arguments());
                 expressions.add(astNodeCreator
                         .createMethodCallExpression(ctx.getText(), expressionListener.expressions()));
+                expressionListener.clear();
             }
         } else {
             expressions.add(astNodeCreator
@@ -42,13 +47,9 @@ public final class ExpressionListener extends GolangBaseListener {
     @Override
     public void enterExpression(ExpressionContext ctx) {
         if (ctx.unaryExpr() != null && ctx.unaryExpr().primaryExpr() != null) {
-            ExpressionListener expressionListener = new ExpressionListener();
-            expressionListener.enterPrimaryExpr(ctx.unaryExpr().primaryExpr());
-            expressions.addAll(expressionListener.expressions());
+            enterPrimaryExpr(ctx.unaryExpr().primaryExpr());
         } else if (ctx.unaryExpr() != null) {
-            ExpressionListener expressionListener = new ExpressionListener();
-            expressionListener.enterUnaryExpr(ctx.unaryExpr());
-            expressions.addAll(expressionListener.expressions());
+            enterUnaryExpr(ctx.unaryExpr());
         } else {
             expressions.add(astNodeCreator.createArgumentExpression(ctx.getText()));
         }
@@ -83,5 +84,9 @@ public final class ExpressionListener extends GolangBaseListener {
 
     List<Expression> expressions() {
         return expressions;
+    }
+
+    void clear() {
+        expressions.clear();
     }
 }
