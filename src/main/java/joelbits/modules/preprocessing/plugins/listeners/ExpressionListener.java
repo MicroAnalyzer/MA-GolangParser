@@ -18,12 +18,8 @@ import java.util.Collections;
 import java.util.List;
 
 public final class ExpressionListener extends GolangBaseListener {
-    private final ASTNodeCreator astNodeCreator;
+    private final ASTNodeCreator astNodeCreator = new ASTNodeCreator();
     private final List<Expression> expressions = new ArrayList<>();
-
-    ExpressionListener(ASTNodeCreator astNodeCreator) {
-        this.astNodeCreator = astNodeCreator;
-    }
 
     @Override
     public void enterPrimaryExpr(PrimaryExprContext ctx) {
@@ -32,7 +28,7 @@ public final class ExpressionListener extends GolangBaseListener {
                 expressions.add(astNodeCreator
                         .createMethodCallExpression(ctx.getText(), Collections.emptyList()));
             } else {
-                ExpressionListener expressionListener = new ExpressionListener(astNodeCreator);
+                ExpressionListener expressionListener = new ExpressionListener();
                 expressionListener.enterArguments(ctx.arguments());
                 expressions.add(astNodeCreator
                         .createMethodCallExpression(ctx.getText(), expressionListener.expressions()));

@@ -14,19 +14,18 @@ import java.util.List;
 
 public final class ClassListener extends GolangBaseListener {
     private List<Declaration> namespaceDeclarations = new ArrayList<>();
-    private final ASTNodeCreator astNodeCreator;
+    private final ASTNodeCreator astNodeCreator = new ASTNodeCreator();
     private final List<Variable> allFields = new ArrayList<>();
     private final List<Method> allMethods = new ArrayList<>();
     private final String namespace;
 
-    public ClassListener(String namespace, ASTNodeCreator astNodeCreator) {
+    public ClassListener(String namespace) {
         this.namespace = namespace;
-        this.astNodeCreator = astNodeCreator;
     }
 
     @Override
     public void enterTopLevelDecl(GolangParser.TopLevelDeclContext ctx) {
-        FunctionListener functionListener = new FunctionListener(astNodeCreator);
+        FunctionListener functionListener = new FunctionListener();
         if (ctx.methodDecl() != null) {
             functionListener.enterMethodDecl(ctx.methodDecl());
             functionListener.enterFunction(ctx.methodDecl().function());

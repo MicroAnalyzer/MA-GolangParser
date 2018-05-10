@@ -17,13 +17,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public final class StatementListener extends GolangBaseListener {
-    private final ASTNodeCreator astNodeCreator;
+    private final ASTNodeCreator astNodeCreator = new ASTNodeCreator();
     private final List<Statement> statements = new ArrayList<>();
     private final List<Expression> expressions = new ArrayList<>();
-
-    StatementListener(ASTNodeCreator astNodeCreator) {
-        this.astNodeCreator = astNodeCreator;
-    }
 
     @Override
     public void enterIfStmt(IfStmtContext ctx) {
@@ -34,7 +30,7 @@ public final class StatementListener extends GolangBaseListener {
 
         List<Statement> ifBodyStatements = new ArrayList<>();
         List<Expression> ifBodyExpressions = new ArrayList<>();
-        StatementListener statementListener = new StatementListener(astNodeCreator);
+        StatementListener statementListener = new StatementListener();
         for (BlockContext block : ctx.block()) {
             statementListener.enterBlock(block);
             ifBodyStatements.addAll(statementListener.statements());
@@ -58,7 +54,7 @@ public final class StatementListener extends GolangBaseListener {
         List<Statement> forBodyStatements = new ArrayList<>();
         List<Expression> forBodyExpressions = new ArrayList<>();
         if (ctx.block() != null) {
-            StatementListener statementListener = new StatementListener(astNodeCreator);
+            StatementListener statementListener = new StatementListener();
             statementListener.enterBlock(ctx.block());
             forBodyStatements.addAll(statementListener.statements());
             forBodyExpressions.addAll(statementListener.expressions());
@@ -73,7 +69,7 @@ public final class StatementListener extends GolangBaseListener {
 
     @Override
     public void enterDeclaration(DeclarationContext ctx) {
-        ExpressionListener expressionListener = new ExpressionListener(astNodeCreator);
+        ExpressionListener expressionListener = new ExpressionListener();
         if (ctx.varDecl() != null) {
             expressionListener.enterVarDecl(ctx.varDecl());
             expressions.addAll(expressionListener.expressions());
@@ -87,7 +83,7 @@ public final class StatementListener extends GolangBaseListener {
     @Override
     public void enterBlock(BlockContext ctx) {
         if (ctx.statementList() != null && ctx.statementList().statement() != null) {
-            StatementListener statementListener = new StatementListener(astNodeCreator);
+            StatementListener statementListener = new StatementListener();
             for (StatementContext statement : ctx.statementList().statement()) {
                 statementListener.enterStatement(statement);
                 statements.add(astNodeCreator
@@ -99,7 +95,7 @@ public final class StatementListener extends GolangBaseListener {
 
     @Override
     public void enterStatement(StatementContext ctx) {
-        StatementListener statementListener = new StatementListener(astNodeCreator);
+        StatementListener statementListener = new StatementListener();
         if (ctx.forStmt() != null) {
             statementListener.enterForStmt(ctx.forStmt());
             statements.addAll(statementListener.statements());
@@ -122,7 +118,7 @@ public final class StatementListener extends GolangBaseListener {
     @Override
     public void enterSimpleStmt(SimpleStmtContext ctx) {
         if (ctx.expressionStmt() != null && ctx.expressionStmt().expression() != null) {
-            ExpressionListener expressionListener = new ExpressionListener(astNodeCreator);
+            ExpressionListener expressionListener = new ExpressionListener();
             expressionListener.enterExpression(ctx.expressionStmt().expression());
             expressions.addAll(expressionListener.expressions());
             expressionListener.clear();

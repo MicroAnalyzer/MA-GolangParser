@@ -17,21 +17,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 public final class FunctionListener extends GolangBaseListener {
-    private final ASTNodeCreator astNodeCreator;
-    private List<Variable> arguments = new ArrayList<>();
-    private List<Expression> expressions = new ArrayList<>();
-    private List<Statement> statements = new ArrayList<>();
+    private final ASTNodeCreator astNodeCreator = new ASTNodeCreator();
+    private final List<Variable> arguments = new ArrayList<>();
+    private final List<Expression> expressions = new ArrayList<>();
+    private final List<Statement> statements = new ArrayList<>();
     private String name;
-
-    FunctionListener(ASTNodeCreator astNodeCreator) {
-        this.astNodeCreator = astNodeCreator;
-    }
 
     @Override
     public void enterFunction(FunctionContext ctx) {
         createArguments(ctx.signature().parameters().parameterList().parameterDecl());
 
-        StatementListener statementListener = new StatementListener(astNodeCreator);
+        StatementListener statementListener = new StatementListener();
         statementListener.enterBlock(ctx.block());
         statements.addAll(statementListener.statements());
         expressions.addAll(statementListener.expressions());

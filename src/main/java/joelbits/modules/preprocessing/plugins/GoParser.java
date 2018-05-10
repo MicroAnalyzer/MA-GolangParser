@@ -37,7 +37,7 @@ public final class GoParser implements FileParser {
         ParseTree tree = parser.sourceFile();
         ParseTreeWalker walker = new ParseTreeWalker();
         String namespace = file.getName().substring(0, file.getName().lastIndexOf("."));
-        ClassListener classListener = new ClassListener(namespace, astNodeCreator);
+        ClassListener classListener = new ClassListener(namespace);
         ImportListener importListener = new ImportListener(imports);
         walker.walk(classListener, tree);
         walker.walk(importListener, tree);
@@ -76,7 +76,7 @@ public final class GoParser implements FileParser {
         loadFile(file);
 
         String namespace = file.getName().substring(0, file.getName().lastIndexOf("."));
-        ClassListener classListener = new ClassListener(namespace, astNodeCreator);
+        ClassListener classListener = new ClassListener(namespace);
         ParseTree tree = parser.sourceFile();
         ParseTreeWalker walker = new ParseTreeWalker();
         walker.walk(classListener, tree);
