@@ -16,38 +16,48 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.atn.PredictionMode;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 @AutoService(FileParser.class)
 public final class GoParser implements FileParser {
+    private static final Logger log = LoggerFactory.getLogger(GoParser.class);
     private final List<String> imports = new ArrayList<>();
     private final List<Namespace> namespaces = new ArrayList<>();
     private final ASTNodeCreator astNodeCreator = new ASTNodeCreator();
     private GolangParser parser;
 
     @Override
-    public byte[] parse(File file) throws Exception {
+    public byte[] parse(File file) throws IOException {
         loadFile(file);
 
         NamespaceCreator namespaceCreator = new NamespaceCreator();
-        ParseTree tree = parser.sourceFile();
         ParseTreeWalker walker = new ParseTreeWalker();
         String namespace = file.getName().substring(0, file.getName().lastIndexOf("."));
         ClassListener classListener = new ClassListener(namespace);
         ImportListener importListener = new ImportListener(imports);
-        walker.walk(classListener, tree);
-        walker.walk(importListener, tree);
+
+        try {
+            ParseTree tree = parser.sourceFile();
+            walker.walk(classListener, tree);
+            walker.walk(importListener, tree);
+        } catch (Exception e) {
+            log.error(e.toString(), e);
+        }
+
         namespaceCreator.createNamespace(namespace, classListener.namespaceDeclarations());
         classListener.clear();
 
         return astNodeCreator.createAstRoot(imports, namespaceCreator.namespaces()).toByteArray();
     }
 
-    private void loadFile(File file) throws Exception {
+    private void loadFile(File file) throws IOException {
         clearData();
         org.antlr.v4.runtime.CharStream input = org.antlr.v4.runtime.CharStreams.fromStream(new FileInputStream(file));
         initParser(initLexer(input));
@@ -72,14 +82,19 @@ public final class GoParser implements FileParser {
     }
 
     @Override
-    public boolean hasBenchmarks(File file) throws Exception {
+    public boolean hasBenchmarks(File file) throws IOException {
         loadFile(file);
 
         String namespace = file.getName().substring(0, file.getName().lastIndexOf("."));
         ClassListener classListener = new ClassListener(namespace);
-        ParseTree tree = parser.sourceFile();
         ParseTreeWalker walker = new ParseTreeWalker();
-        walker.walk(classListener, tree);
+
+        try {
+            ParseTree tree = parser.sourceFile();
+            walker.walk(classListener, tree);
+        } catch (Exception e) {
+            log.error(e.toString(), e);
+        }
 
         boolean hasBenchmark = hasBenchmarks(classListener.methods());
         classListener.clear();

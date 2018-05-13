@@ -9,7 +9,6 @@ import joelbits.modules.preprocessing.plugins.golang.GolangParser;
 import joelbits.modules.preprocessing.utils.ASTNodeCreator;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public final class ClassListener extends GolangBaseListener {
@@ -50,7 +49,7 @@ public final class ClassListener extends GolangBaseListener {
     }
 
     public List<Method> methods() {
-        return Collections.unmodifiableList(allMethods);
+        return allMethods;
     }
 
     public void clear() {
